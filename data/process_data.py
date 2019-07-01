@@ -1,8 +1,24 @@
 import sys
+import pandas as pd
+from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    
+    ''' Loads messages and category datasets and joins them 
+    together using the common id.'''
+    
+    ''' Returns: pandas.DataFrame '''
+    
+    #Load data.
+    messages = pd.read_csv(messages_filepath, dtype=str)
+    categories = pd.read_csv(categories_filepath, dtype=str)
+    
+    #Merge datasets using common id. 
+    df = categories.set_index('id').join(messages.set_index('id'))
+    
+    return df
+    
 
 
 def clean_data(df):
