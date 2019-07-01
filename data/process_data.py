@@ -72,7 +72,7 @@ def save_data(df, database_filepath):
     
     df.to_sql('messages', con=engine, if_exists='replace', index=False)
     
-
+    return None
 
 
 def main():
