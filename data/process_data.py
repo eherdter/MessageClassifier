@@ -64,8 +64,15 @@ def clean_data(df):
     
 
 
-def save_data(df, database_filename):
-    pass  
+def save_data(df, database_filepath):
+    
+    ''' Saves cleaned df to a SQL database.'''
+    
+    engine = create_engine('sqlite:///' + database_filepath)
+    
+    df.to_sql('messages', con=engine, if_exists='replace', index=False)
+    
+
 
 
 def main():
