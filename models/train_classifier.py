@@ -1,16 +1,80 @@
 import sys
+import nltk
+nltk.download(['punkt', 'wordnet'])
+import re
+import numpy as np
+import pandas as pd
+from sqlalchemy import create_engine 
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+
 
 
 def load_data(database_filepath):
-    pass
+    
+    ''' Loads data from database.'''
+    ''' Returns: X, Y, and category names. '''
+    
+    engine = create_engine('sqlite:///' + database_filepath)
+    df = pd.read_sql_table('messages', con=engine)
+    X= df.message.values
+    Y = df.iloc[:, :36].values
+    categories = df.iloc[:, :36].columns
+    
+    return X, Y, categories
 
 
 def tokenize(text):
-    pass
-
+    
+    ''' Tokenizer function that processes the message data.'''
+    ''' Returns: the cleaned tokens for each message. '''
+    
+    #replace urls
+    detected_urls = re.findall(url_regex, text)
+    
+    for url in detected_urls:
+        text = text.replace(url, "urlplaceholder")
+    
+    #tokenize the text
+    tokens = word_tokenize(text)
+    
+    #instantiate the WordNetLammatizer
+    lemmatizer = WordNetLemmatizer()
+    
+    #lemmatize the tokens from above
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+        
+    return clean_tokens
+    
 
 def build_model():
-    pass
+    
+    ''' Builds the ML pipleline and performs Grid Search with CV.'''
+    ''' Returns: Instantiated model that should be fit in a following function. '''
+    
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer = tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', RandomForestClassifier())
+    ])
+    
+    
+    parameters = {
+    'clf__n_estimators': [50, 100, 200]
+    }
+
+    cv = GridSearchCV(pipeline, param_grid = parameters)
+    
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
