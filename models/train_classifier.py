@@ -125,7 +125,7 @@ def main():
         model = build_model()
         print('Finished  building model.')
         
-        print('Training model...')
+        print('Training model.It may take a while, please be patient.')
         model.fit(X_train, Y_train)
         print('Finished training model.')
         
