@@ -11,8 +11,8 @@ def load_data(messages_filepath, categories_filepath):
     ''' Returns: pandas.DataFrame '''
     
     #Load data.
-    messages = pd.read_csv(messages_filepath, dtype=str)
-    categories = pd.read_csv(categories_filepath, dtype=str)
+    messages = pd.read_csv(messages_filepath, dtype=str, ecoding ='latin-1')
+    categories = pd.read_csv(categories_filepath, dtype=str, ecoding ='latin-1')
     
     #Merge datasets using common id. 
     df = categories.set_index('id').join(messages.set_index('id'))
@@ -45,20 +45,8 @@ def clean_data(df):
     #removes duplicate rows
     df = df.drop_duplicates()
     
-    #removes rows where related column is non-binary (e.g. ! (0|1))
-    df = df[df['related'] !=2]
-    
-    #remove rows where there is not selected category marked
-        #make a new sum column to check
-    col_list= list(df.drop([ 'direct_report','message','original','genre'], axis=1))
-    df['sum'] = df[col_list].sum(axis=1)
-    
-    df = df[df['sum'] !=0]
-        #drop the sum column
-    df.drop(['sum'], axis=1, inplace=True)
-    
-    #remove rows with message starting with "NOTES:"
-    df = df[~df.message.str.contains("NOTES:")]
+    #change level 2 for related column to level 0 b/c they are not related posts
+    df[df['related'] == 2] = 0
     
     return df
     
