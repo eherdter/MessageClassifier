@@ -5,6 +5,7 @@ import re
 import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
+
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
@@ -23,6 +24,7 @@ def load_data(database_filepath):
 
     ''' Loads data from database.'''
     ''' Returns: X, Y, and category names. '''
+
 
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('messages', con=engine)
@@ -57,7 +59,9 @@ def tokenize(text):
     clean_tokens = [lemmatizer.lemmatize(tok).strip() for tok in tokens if tok not in stopwords.words("english")]
     clean_tokens = [stemmer.stem(tok) for tok in clean_tokens]
 
+
     return clean_tokens
+
 
 
 def build_model():
@@ -71,7 +75,6 @@ def build_model():
         ('clf', RandomForestClassifier(random_state=42))
     ])
 
-
     parameters = {
         #'tfidf__use_idf': (True, False),
         'clf__n_estimators':[50] #range(50,100,10),
@@ -79,11 +82,12 @@ def build_model():
     }
 
     model = GridSearchCV(pipeline, param_grid = parameters)
-
+    
     return model
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+
 
     '''Makes a prediction and evaluates the models predictive abilities using a
         classification_report scheme.'''
@@ -108,6 +112,7 @@ def save_model(model, model_filepath):
 
     ''' Saves model to pickle file.'''
 
+
     filename = model_filepath
     pickle.dump(model, open(filename, 'wb'))
 
@@ -115,6 +120,7 @@ def save_model(model, model_filepath):
 def main():
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
+
 
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
