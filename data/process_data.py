@@ -45,6 +45,9 @@ def clean_data(df):
     #removes duplicate rows
     df = df.drop_duplicates()
     
+    #remove child alone category because there are no notes for it
+    df = df.drop(['child_alone'], axis=1)
+    
     #change level 2 for related column to level 0 b/c they are not related posts
     df[df['related'] == 2] = 0
     
