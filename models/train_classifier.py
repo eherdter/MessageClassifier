@@ -11,7 +11,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, precision_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -27,8 +27,8 @@ def load_data(database_filepath):
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('messages', con=engine)
     X= df.message.values
-    Y = df.iloc[:, :36].values
-    categories = df.iloc[:, :36].columns
+    Y = df.iloc[:, :35].values
+    categories = df.iloc[:, :35].columns
     
     return X, Y, categories
 
@@ -50,11 +50,11 @@ def tokenize(text):
     #Tokenize text
     tokens = word_tokenize(text)
     
-    
     #Lemmatize and remove stopwords, end with stemming
     lemmatizer = WordNetLemmatizer()
+    stemmer = PorterStemmer()
     clean_tokens = [lemmatizer.lemmatize(tok).strip() for tok in tokens if tok not in stopwords.words("english")]
-    clean_tokens = [PorterStemmer().stem(tok) for tok in clean_tokens]
+    clean_tokens = [stemmer.stem(tok) for tok in clean_tokens]
     
     return clean_tokens
     
@@ -73,7 +73,7 @@ def build_model():
     
     parameters = {
         'tfidf__use_idf': (True, False),
-        'clf__n_estimators':range(50,100,25),
+        'clf__n_estimators':range(50,100,10),
         'clf__min_samples_split':range(5,25,5)
     }
 
@@ -87,17 +87,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
     '''Makes a prediction and evaluates the models predictive abilities using a
         classification_report scheme.'''
     
-    '''Prints: Classification report where reported averages are a 
-        prevalence-weighted macro-average across classes.'''
+    '''Prints:classification report where reported averages are a 
+        prevalence-weighted macro-average across classes, and precision metrics.'''
     
-    y_pred = model.predict(X_test)
+    Y_pred = model.predict(X_test)
     
     #loops through each category and prints classification report for each.
     for i in range(len(y_pred.T)):
         cat = category_names[i]
-        pred_cat = y_pred.T[i]
+        pred_cat = Y_pred.T[i]
         test_cat = Y_test.T[i]
-        print(cat, classification_report(test_cat, pred_cat)) #adjust this
+        print(cat, classification_report(test_cat, pred_cat), precision_score(test_cat, pred_cat)) #adjust this
     
     return None
  
@@ -128,6 +128,8 @@ def main():
         print('Training model...')
         model.fit(X_train, Y_train)
         print('Finished training model.')
+        
+        print('Best model parameters...\n    Model params: {}'.format(model.best_params)) 
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
