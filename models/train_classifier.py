@@ -76,13 +76,15 @@ def build_model():
     ])
 
     parameters = {
+        'vect__max_df': (0.5, 0.75, 1.0),
+        #'vect__ngram_range': ((1, 1), (1, 2)),
         #'tfidf__use_idf': (True, False),
-        'clf__n_estimators':[50] #range(50,100,10),
-        #'clf__min_samples_split':range(5,25,5)
+        #'clf__n_estimators':[1, 2, 4, 8, 16, 32, 64, 100, 200],
+        #'clf__max_depth':range(5,25,5)
     }
 
     model = GridSearchCV(pipeline, param_grid = parameters)
-    
+
     return model
 
 
