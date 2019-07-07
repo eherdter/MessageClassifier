@@ -32,8 +32,13 @@
 
 <div class="jumbotron">
     <div class="container">
-        <h1 class="text-center">Disaster Response Project</h1>
-        <p class="text-center">Analyzing message data for disaster response</p>
+        <h1 class="text-center">Classifying message data for rapid disaster response</h1>
+        <p>A message classification model was trained using messages sent during natural disasters around the globe. The dataset 			contains 25,000+ messages sent during events including the 2010 earthquakes in Haiti and Chile, the devestating floods 				in Pakistan in 2010, and super-storm Sandy. In addition, additional news articles spanning a large number of years and 				other different disasters are included in the dataset.The data have been anonimized and encoded with 36 different categories related to disaster response.The data were provided by <a href="https://www.figure-eight.com/dataset/combined-disaster-response-data/">Figure Eight</a> for <a href="https://www.udacity.com/">Udacity</a>.</p>
+     	<p>
+		The data were cleaned and transformed in an ETL pipeline prior to being fed into a natural language processing ML pipeline.
+       A RandomForest Classifier equipped to deal with multi-label data was used as a classifier and GridSearchCV (with 5-fold Cross Validation) was used to search over a range of parameters. </p>
+      
+      
         <hr />
       
         <div class="row">
@@ -52,7 +57,7 @@
     </div>
 </div>
 
-<div class="container">
+<div class="container" style='width:80%'>
     {% block content %}
         <div class="page-header">
             <h1 class="text-center">Overview of Training Dataset</h1>
