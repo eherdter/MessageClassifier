@@ -9,13 +9,14 @@ from sqlalchemy import create_engine
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
+
 
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, precision_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+
 
 import pickle
 
@@ -28,11 +29,13 @@ def load_data(database_filepath):
 
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('messages', con=engine)
+    #df = df.sample(frac=0.2, random_state=45)
     X= df.message.values
     Y = df.iloc[:, :35].values
-    categories = df.iloc[:, :35].columns
+    category_names = df.iloc[:, :35].columns
+    print(category_names)
 
-    return X, Y, categories
+    return X, Y, category_names
 
 
 def tokenize(text):
@@ -53,12 +56,9 @@ def tokenize(text):
     #Tokenize text
     tokens = word_tokenize(text)
 
-    #Lemmatize and remove stopwords, end with stemming
+    #Lemmatize and remove stopwords
     lemmatizer = WordNetLemmatizer()
-    stemmer = PorterStemmer()
     clean_tokens = [lemmatizer.lemmatize(tok).strip() for tok in tokens if tok not in stopwords.words("english")]
-    clean_tokens = [stemmer.stem(tok) for tok in clean_tokens]
-
 
     return clean_tokens
 
@@ -72,15 +72,16 @@ def build_model():
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer = tokenize)),
         ('tfidf', TfidfTransformer()),
-        ('clf', RandomForestClassifier(random_state=42))
+        #('clf', MLkNN())
+        ('clf', RandomForestClassifier(random_state=42, n_jobs=-1))
     ])
 
     parameters = {
-        'vect__max_df': (0.5, 0.75, 1.0),
-        #'vect__ngram_range': ((1, 1), (1, 2)),
-        #'tfidf__use_idf': (True, False),
-        #'clf__n_estimators':[1, 2, 4, 8, 16, 32, 64, 100, 200],
-        #'clf__max_depth':range(5,25,5)
+       'vect__max_df': (0.5, 0.75, 1.0),
+       'vect__ngram_range': ((1, 1), (1, 2)),
+        'tfidf__use_idf': [True,False],
+        'clf__n_estimators':[1,4,8,16,32,64,100],
+        'clf__max_depth':range(10,100,10)
     }
 
     model = GridSearchCV(pipeline, param_grid = parameters)
@@ -91,20 +92,23 @@ def build_model():
 def evaluate_model(model, X_test, Y_test, category_names):
 
 
-    '''Makes a prediction and evaluates the models predictive abilities using a
+    ''' Makes a prediction and evaluates the models predictive abilities using a
         classification_report scheme.'''
 
-    '''Prints:classification report where reported averages are a
-        prevalence-weighted macro-average across classes, and precision metrics.'''
+    ''' Prints: classification report where reported averages are a
+        prevalence-weighted macro-average across classes, and precision
+        metrics.'''
 
     Y_pred = model.predict(X_test)
 
-    #loops through each category and prints classification report for each.
+    loops through each category and prints classification report for each.
     for i in range(len(Y_pred.T)):
         cat = category_names[i]
         pred_cat = Y_pred.T[i]
         test_cat = Y_test.T[i]
         print(cat, classification_report(test_cat, pred_cat), precision_score(test_cat, pred_cat))
+    print(precision_score(Y_pred, Y_test, average='micro'))
+    print(model.best_params_)
 
     return None
 
