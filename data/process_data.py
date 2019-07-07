@@ -23,10 +23,11 @@ def load_data(messages_filepath, categories_filepath):
 
 def clean_data(df):
 
-    '''Tidy and clean df. Tidies the categories columns, cleans up duplicates rows,
-    removes rows with non binary (0/1) category entries, removes rows where there is no category selected (1).'''
+    ''' Tidy and clean df. Tidies the categories columns, cleans up duplicates
+    rows,removes rows with non binary (0/1) category entries, removes rows where
+    there is no category selected (1).'''
 
-    '''Returns: pandas.DataFrame '''
+    ''' Returns: pandas.DataFrame '''
 
     #split categories into separate category columns and assign column names
     categories = df.categories.str.split(';', expand=True)
@@ -49,7 +50,7 @@ def clean_data(df):
     df = df.drop(['child_alone'], axis=1)
 
     #change level 2 for related column to level 0 b/c they are not related posts
-    df[df['related'] == 2] = 0
+    df['related'][df['related'] == 2] = 0
 
     return df
 
