@@ -31,15 +31,12 @@ def tokenize(text):
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
-# load model
+#load model from local machine
 #model = joblib.load("../models/classifier.pkl")
 
 #load model from S3
 s3 = boto3.client("s3", region_name="us-east-2")
 response = s3.get_object(Bucket="eherdterprojects", Key="classifier.pkl")
-
-#with open('classifier.pkl', 'wb') as model:
-#     s3.Bucket('bucket').download_fileobj("eherdter/classifier.pkl", model)
 
 body_string = response['Body'].read()
 model = cPickle.loads(body_string)
