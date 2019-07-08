@@ -52,6 +52,9 @@ Additionally, there are some methods built within or on top of sklearn that may 
 
 However, each have their drawbacks. For example, **BalancedRandonForestClassification** does not currently support resampling for multi-label data sets. Therefore, the current classifier has room for improvement. Some immediate suggestions for improvement may be to select specific categories of interest and manually oversample the messages within the category. 
 
+### Python Version
+This project was built using Python Version 3.7.0
+
 ### Acknowledgements 
 The skeleton files and data set for this project were provided by [Udacity](https://www.udacity.com/). 
 
