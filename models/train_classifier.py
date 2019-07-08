@@ -12,7 +12,7 @@ from nltk.corpus import stopwords
 
 
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report, precision_score
+from sklearn.metrics import classification_report, precision_score, f1_score, recall_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
@@ -29,11 +29,11 @@ def load_data(database_filepath):
 
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('messages', con=engine)
-    #df = df.sample(frac=0.2, random_state=45)
+    
+    #Select X and Y columns, as well as category names 
     X= df.message.values
     Y = df.iloc[:, :35].values
     category_names = df.iloc[:, :35].columns
-    print(category_names)
 
     return X, Y, category_names
 
@@ -43,7 +43,7 @@ def tokenize(text):
     ''' Tokenizer function that processes the message data.'''
     ''' Returns: the cleaned tokens for each message. '''
 
-    #replace urls
+    #Replace urls
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+] |[!*\(\), ]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
 
@@ -67,12 +67,11 @@ def tokenize(text):
 def build_model():
 
     ''' Builds the ML pipeline with GridSearchCV.'''
-    ''' Returns: Instantiated model that should be fit in a following function. '''
+    ''' Returns: Instantiated model. '''
 
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer = tokenize)),
         ('tfidf', TfidfTransformer()),
-        #('clf', MLkNN())
         ('clf', RandomForestClassifier(random_state=42, n_jobs=-1))
     ])
 
@@ -95,18 +94,19 @@ def evaluate_model(model, X_test, Y_test, category_names):
     ''' Makes a prediction and evaluates the models predictive abilities using a
         classification_report scheme.'''
 
-    ''' Prints: classification report where reported averages are a
-        prevalence-weighted macro-average across classes, and precision
-        metrics.'''
+    ''' Prints: Precision score (average='micro'), f1_score (average='micro'), and \
+        recall_score (average='micro') for each labeled category. '''
 
     Y_pred = model.predict(X_test)
 
-    loops through each category and prints classification report for each.
+    #Loop through each category and prints classification report for each.
     for i in range(len(Y_pred.T)):
         cat = category_names[i]
         pred_cat = Y_pred.T[i]
         test_cat = Y_test.T[i]
-        print(cat, classification_report(test_cat, pred_cat), precision_score(test_cat, pred_cat))
+        print(cat, precision_score(test_cat, pred_cat, average='micro'), f1_score(test_cat, pred_cat, average='micro'), recall_score(test_cat, pred_cat, average='micro')) )
+    
+    #prints final precision score over all categories
     print(precision_score(Y_pred, Y_test, average='micro'))
     print(model.best_params_)
 
