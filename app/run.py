@@ -1,6 +1,8 @@
 import json
 import plotly
 import pandas as pd
+import boto3
+import _pickle as cPickle
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -30,19 +32,26 @@ engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/classifier.pkl")
+#model = joblib.load("../models/classifier.pkl")
 
+#load model from S3
+s3 = boto3.client("s3", region_name="us-east-2")
+response = s3.get_object(Bucket="eherdterprojects", Key="classifier.pkl")
+
+#with open('classifier.pkl', 'wb') as model:
+#     s3.Bucket('bucket').download_fileobj("eherdter/classifier.pkl", model)
+
+body_string = response['Body'].read()
+model = cPickle.loads(body_string)
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
 
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
-    
+
     #make plot of messages with multiple labels
     #messages having multiple labels
     col_list= list(df.drop(['direct_report','message','original','genre'], axis=1))
@@ -51,38 +60,38 @@ def index():
     df['mult_lab_sum'] = df['mult_lab_sum'].astype(str)
     values=df.mult_lab_sum.value_counts().values
     num_labels=df.mult_lab_sum.value_counts().index.values
-    
+
     #make plot of #comments that have each label
     nrows_entire = df.shape[0]
     def label_by_gen(df1):
-        df_cols = df1.drop(['direct_report','message','original','genre', 'mult_lab_sum'], axis=1)
+        df_cols = df1.drop(['direct_report','message','original','genre'], axis=1)
         df_bkdown = pd.DataFrame(df_cols.sum()/nrows_entire, columns=['percent']).sort_values(by=['percent'])
         df_labels = df_bkdown.index.tolist()
         df_perc = df_bkdown['percent'].values
         return df_labels, df_perc
-    
+
     news = df[df['genre'] == 'news']
     news_labels, news_perc = label_by_gen(news)
-    
+
     social = df[df['genre'] == 'social']
-    social_labels, social_perc = label_by_gen(social)   
-   
+    social_labels, social_perc = label_by_gen(social)
+
     direct = df[df['genre'] == 'direct']
     direct_labels, direct_perc = label_by_gen(direct)
-     
-      
 
-    
+
+
+
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
     graphs = [
-       
+
         {
             'data': [
                 Pie(
                     labels=genre_names,
                     values=genre_counts,
-                    hoverinfo='label+percent', textinfo='value', 
+                    hoverinfo='label+percent', textinfo='value',
                     textfont=dict(size=20),
                     marker=dict(colors=['#FEBFB3', '#E1396C', '#96D38C'],
                     line=dict(color='#000000', width=2))
@@ -90,7 +99,7 @@ def index():
                 ],
             'layout' : {
                 'title': 'Distribution of Message Genres'}
-        }, 
+        },
         { 'data': [Bar(
                     x=news_perc,
                     y=news_labels,
@@ -100,7 +109,7 @@ def index():
                                   line=dict( color='#000000',
                                             width=1.5))
                     ),
-                   
+
                     Bar(
                     x=direct_perc,
                     y=direct_labels,
@@ -109,7 +118,7 @@ def index():
                     marker = dict(color='#febfb3',line=dict( color='#000000',
                                             width=1.5))
                     ),
-                
+
                     Bar(
                     x=social_perc,
                     y=social_labels,
@@ -118,7 +127,7 @@ def index():
                     marker = dict(color='#96D38C', line=dict( color='#000000',
                                             width=1.5))
                     )
-        
+
                   ],
            'layout': {
                'title': 'Distribution of Assigned Labels by Message Genre',
@@ -128,7 +137,7 @@ def index():
                'barmode': 'stack'
            }
         },
-        
+
         {
             'data': [
                 Bar(
