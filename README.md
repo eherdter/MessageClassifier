@@ -31,7 +31,7 @@ To produce your own trained classifier:
 
 ### Important Considerations
 
-This data set presents itself as a very intensive multi-label classification task as each message may be categorized in up to 36 different categories. In addition, many categories are extremely imbalanced. For example, there are only XX% of the messages that are labeled within the ## category. 
+This data set presents itself as a very intensive multi-label classification task as each message may be categorized in up to 36 different categories. In addition, many categories are extremely imbalanced. For example, some labels like water have few examples
 
 Due to such extreme imbalance, it is strongly advised against using accuracy but rather using a metric such as precision or f1_score. There are some methods to address the imbalance specifically within multi-label data sets including random resampling algorithms which are documented in the literature, for example see [Charte et al. 2015](https://sci2s.ugr.es/sites/default/files/ficherosPublicaciones/1790_2015-Neuro-Charte-MultiLabel_Imbalanced.pdf). 
 
