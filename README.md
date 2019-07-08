@@ -29,7 +29,7 @@ To produce your own trained classifier:
 3. Go to http://0.0.0.0:3001/
 
 
-### Import Considerations
+### Important Considerations
 
 This data set presents itself as a very intensive multi-label classification task as each message may be categorized in up to 36 different categories. In addition, many categories are extremely imbalanced. For example, there are only XX% of the messages that are labeled within the ## category. 
 
