@@ -2,7 +2,7 @@ import json
 import plotly
 import pandas as pd
 import boto3
-import _pickle as cPickle
+import pickle
 
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -31,7 +31,7 @@ def tokenize(text):
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
-#load model from local machine
+# load model
 #model = joblib.load("../models/classifier.pkl")
 
 #load model from S3
@@ -39,7 +39,7 @@ s3 = boto3.client("s3", region_name="us-east-2")
 response = s3.get_object(Bucket="eherdterprojects", Key="classifier.pkl")
 
 body_string = response['Body'].read()
-model = cPickle.loads(body_string)
+model = pickle.loads(body_string)
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
