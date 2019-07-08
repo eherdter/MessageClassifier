@@ -23,7 +23,20 @@ To produce your own trained classifier:
     - To run ML pipeline that trains classifier and saves
         `python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl`
 
-2. Run the following command in the app's directory to run your web app.
+2. Modify the run.py script to load the pickle model from your local directory as such:
+
+    - Load model from local machine
+        `model = joblib.load("../models/classifier.pkl")`
+        
+    - remove or comment out these lines - use a # to comment out
+        #load pickle model from my personal Amazon S3 bucket with boto3
+        `s3 = boto3.client("s3", region_name="us-east-2")`
+        `response = s3.get_object(Bucket="eherdterprojects", Key="classifier.pkl")`
+        `body_string = response['Body'].read()`
+        `model = cPickle.loads(body_string)`
+
+
+3. Run the following command in the app's directory to run your web app.
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
