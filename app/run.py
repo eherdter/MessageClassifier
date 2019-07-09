@@ -32,7 +32,8 @@ engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
 # load model
-model = joblib.load("../models/classifier.pkl")
+#model = joblib.load("../models/classifier.pkl")
+model = pickle.load(open("../models/classifier.pkl", 'rb'))
 
 #load model from S3
 #s3 = boto3.client("s3", region_name="us-east-2")
