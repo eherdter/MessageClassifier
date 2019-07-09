@@ -5,6 +5,7 @@ import re
 import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
+import pickle
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -18,9 +19,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
 
-import pickle
-
-
 def load_data(database_filepath):
 
     ''' Loads data from database.'''
@@ -29,8 +27,8 @@ def load_data(database_filepath):
 
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table('messages', con=engine)
-    
-    #Select X and Y columns, as well as category names 
+
+    #Select X and Y columns, as well as category names
     X= df.message.values
     Y = df.iloc[:, :35].values
     category_names = df.iloc[:, :35].columns
@@ -76,11 +74,12 @@ def build_model():
     ])
 
     parameters = {
-       'vect__max_df': (0.5, 0.75, 1.0),
-       'vect__ngram_range': ((1, 1), (1, 2)),
-        'tfidf__use_idf': [True,False],
-        'clf__n_estimators':[1,4,8,16,32,64,100],
-        'clf__max_depth':range(10,100,10)
+       #'vect__max_df': (0.5, 0.75, 1.0),
+       #'vect__ngram_range': ((1, 1), (1, 2)),
+    #    'tfidf__use_idf': [True,False],
+        'clf__n_estimators': [32]
+#        'clf__n_estimators':[1,4,8,16,32,64,100],
+    #    'clf__max_depth':range(10,100,10)
     }
 
     model = GridSearchCV(pipeline, param_grid = parameters)
@@ -104,8 +103,8 @@ def evaluate_model(model, X_test, Y_test, category_names):
         cat = category_names[i]
         pred_cat = Y_pred.T[i]
         test_cat = Y_test.T[i]
-        print(cat, precision_score(test_cat, pred_cat, average='micro'), f1_score(test_cat, pred_cat, average='micro'), recall_score(test_cat, pred_cat, average='micro')) )
-    
+        print(cat, precision_score(test_cat, pred_cat, average='micro'), f1_score(test_cat, pred_cat, average='micro'), recall_score(test_cat, pred_cat, average='micro'))
+
     #prints final precision score over all categories
     print(precision_score(Y_pred, Y_test, average='micro'))
     print(model.best_params_)
