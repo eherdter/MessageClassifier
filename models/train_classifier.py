@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sqlalchemy import create_engine
 import pickle
+import joblib
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -119,7 +120,10 @@ def save_model(model, model_filepath):
 
 
     filename = model_filepath
-    pickle.dump(model, open(filename, 'wb'))
+    #pickle.dump(model, open(filename, 'wb'))
+    joblib.dump(model, filename)
+
+
 
 
 def main():
