@@ -32,14 +32,14 @@ engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('messages', engine)
 
 # load model
-#model = joblib.load("../models/classifier.pkl")
+model = joblib.load("../models/classifier.pkl")
 
 #load model from S3
-s3 = boto3.client("s3", region_name="us-east-2")
-response = s3.get_object(Bucket="eherdterprojects", Key="classifier.pkl")
+#s3 = boto3.client("s3", region_name="us-east-2")
+#response = s3.get_object(Bucket="eherdterprojects", Key="classifier.pkl")
 
-body_string = response['Body'].read()
-model = pickle.loads(body_string)
+#body_string = response['Body'].read()
+#model = pickle.loads(body_string)
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
